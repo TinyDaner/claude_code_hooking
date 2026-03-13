@@ -2,6 +2,8 @@
 
 **[中文](#中文) | [English](#english)**
 
+> **Demo Video / 演示视频**: [Bilibili](https://www.bilibili.com/video/BV1JcwJz3Exy/)
+
 ---
 
 <a id="english"></a>
