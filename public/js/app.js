@@ -31,6 +31,11 @@
 
   ws.connect();
 
+  // Version tag
+  fetch('/api/version').then(r => r.json()).then(d => {
+    document.getElementById('version-tag').textContent = 'v' + d.version;
+  }).catch(() => {});
+
   // Config modal
   const configModal = document.getElementById('config-modal');
   const configCode = document.getElementById('config-code');

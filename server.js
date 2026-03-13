@@ -100,6 +100,10 @@ app.get('/api/config', (req, res) => {
   res.json(generateFullSettings('localhost', PORT));
 });
 
+app.get('/api/version', (req, res) => {
+  res.json({ version: require('./package.json').version });
+});
+
 app.get('/api/stats', (req, res) => {
   res.json(store.getStats());
 });
