@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code 监控台</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <img src="/assets/favicon.svg" width="24" height="24" alt="Clawd">
+      <span>Claude Code 监控台</span>
+    </div>
+    <div class="navbar-stats" id="navbar-stats">
+      <div class="stat-item"><span class="stat-dot active"></span><span class="stat-icon icon-spin" id="stat-active-icon" style="display:none"></span><span id="stat-active">0</span> 运行中</div>
+      <div class="stat-item"><span class="stat-dot waiting"></span><span class="stat-icon icon-pulse" id="stat-waiting-icon" style="display:none"></span><span id="stat-waiting">0</span> 等待中</div>
+      <div class="stat-item"><span class="stat-dot attention"></span><span class="stat-icon icon-flash" id="stat-attention-icon" style="display:none">!</span><span id="stat-attention">0</span> 需关注</div>
+      <div class="stat-item"><span id="stat-tokens">0</span> token</div>
+    </div>
+    <div class="navbar-actions">
+      <div class="ws-indicator" id="ws-indicator" title="WebSocket 未连接"></div>
+      <button class="btn-icon" id="btn-config" title="Hook 配置">&#9881;</button>
+      <button class="btn-icon" id="btn-theme" title="切换主题">&#9789;</button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Alerts -->
+    <div class="alert-container" id="alert-container"></div>
+
+    <!-- Session Grid -->
+    <div class="session-grid" id="session-grid">
+      <div class="empty-state" id="empty-state">
+        <div class="radar-container">
+          <div class="radar-ring"></div>
+          <div class="radar-ring"></div>
+          <div class="radar-ring"></div>
+          <div class="radar-center"></div>
+        </div>
+        <h3>暂无活跃会话</h3>
+        <p>为你的 Claude Code 实例配置 HTTP Hook 即可开始监控。点击上方齿轮图标查看配置说明。</p>
+      </div>
+    </div>
+
+    <!-- Event Log -->
+    <div class="event-log-panel" id="event-log-panel">
+      <div class="event-log-header">
+        <span>事件日志</span>
+        <span>
+          <span class="filter-info" id="filter-info"></span>
+          <button class="clear-filter" id="clear-filter" style="display:none">清除筛选</button>
+        </span>
+      </div>
+      <div class="event-log-body" id="event-log-body"></div>
+    </div>
+  </main>
+
+  <!-- Config Modal -->
+  <div class="modal-overlay" id="config-modal" style="display:none">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Hook 配置</h2>
+        <button class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>将以下 JSON 添加到你的 <strong>~/.claude/settings.json</strong> 文件中，即可将 Claude Code 实例连接到此监控台：</p>
+        <div class="config-code" id="config-code">加载中...</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="btn-copy">复制到剪贴板</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/theme.js"></script>
+  <script src="/js/ws.js"></script>
+  <script src="/js/name-generator.js"></script>
+  <script src="/js/session-card.js"></script>
+  <script src="/js/event-log.js"></script>
+  <script src="/js/alerts.js"></script>
+  <script src="/js/dashboard.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

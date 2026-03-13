@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 68 35">
+  <!-- Pixel-perfect Clawd, same coordinates as CSS clawdWalk animation -->
+  <!-- y=0 dome top -->
+  <rect x="12" y="0" width="4" height="7" fill="#D77757"/>
+  <rect x="16" y="0" width="4" height="7" fill="#D77757"/>
+  <rect x="20" y="0" width="4" height="7" fill="#D77757"/>
+  <rect x="24" y="0" width="4" height="7" fill="#D77757"/>
+  <rect x="28" y="0" width="4" height="7" fill="#D77757"/>
+  <rect x="32" y="0" width="4" height="7" fill="#D77757"/>
+  <rect x="36" y="0" width="4" height="7" fill="#D77757"/>
+  <rect x="40" y="0" width="4" height="7" fill="#D77757"/>
+  <rect x="44" y="0" width="4" height="7" fill="#D77757"/>
+  <rect x="48" y="0" width="4" height="7" fill="#D77757"/>
+  <rect x="52" y="0" width="4" height="7" fill="#D77757"/>
+  <rect x="56" y="0" width="4" height="7" fill="#D77757"/>
+  <!-- y=7 dome bottom (eye gaps at 20 and 48) -->
+  <rect x="12" y="7" width="4" height="7" fill="#D77757"/>
+  <rect x="16" y="7" width="4" height="7" fill="#D77757"/>
+  <rect x="24" y="7" width="4" height="7" fill="#D77757"/>
+  <rect x="28" y="7" width="4" height="7" fill="#D77757"/>
+  <rect x="32" y="7" width="4" height="7" fill="#D77757"/>
+  <rect x="36" y="7" width="4" height="7" fill="#D77757"/>
+  <rect x="40" y="7" width="4" height="7" fill="#D77757"/>
+  <rect x="44" y="7" width="4" height="7" fill="#D77757"/>
+  <rect x="52" y="7" width="4" height="7" fill="#D77757"/>
+  <rect x="56" y="7" width="4" height="7" fill="#D77757"/>
+  <!-- y=14 body top (widest) -->
+  <rect x="4" y="14" width="4" height="7" fill="#D77757"/>
+  <rect x="8" y="14" width="4" height="7" fill="#D77757"/>
+  <rect x="12" y="14" width="4" height="7" fill="#D77757"/>
+  <rect x="16" y="14" width="4" height="7" fill="#D77757"/>
+  <rect x="20" y="14" width="4" height="7" fill="#D77757"/>
+  <rect x="24" y="14" width="4" height="7" fill="#D77757"/>
+  <rect x="28" y="14" width="4" height="7" fill="#D77757"/>
+  <rect x="32" y="14" width="4" height="7" fill="#D77757"/>
+  <rect x="36" y="14" width="4" height="7" fill="#D77757"/>
+  <rect x="40" y="14" width="4" height="7" fill="#D77757"/>
+  <rect x="44" y="14" width="4" height="7" fill="#D77757"/>
+  <rect x="48" y="14" width="4" height="7" fill="#D77757"/>
+  <rect x="52" y="14" width="4" height="7" fill="#D77757"/>
+  <rect x="56" y="14" width="4" height="7" fill="#D77757"/>
+  <rect x="60" y="14" width="4" height="7" fill="#D77757"/>
+  <rect x="64" y="14" width="4" height="7" fill="#D77757"/>
+  <!-- y=21 body bottom -->
+  <rect x="12" y="21" width="4" height="7" fill="#D77757"/>
+  <rect x="16" y="21" width="4" height="7" fill="#D77757"/>
+  <rect x="20" y="21" width="4" height="7" fill="#D77757"/>
+  <rect x="24" y="21" width="4" height="7" fill="#D77757"/>
+  <rect x="28" y="21" width="4" height="7" fill="#D77757"/>
+  <rect x="32" y="21" width="4" height="7" fill="#D77757"/>
+  <rect x="36" y="21" width="4" height="7" fill="#D77757"/>
+  <rect x="40" y="21" width="4" height="7" fill="#D77757"/>
+  <rect x="44" y="21" width="4" height="7" fill="#D77757"/>
+  <rect x="48" y="21" width="4" height="7" fill="#D77757"/>
+  <rect x="52" y="21" width="4" height="7" fill="#D77757"/>
+  <rect x="56" y="21" width="4" height="7" fill="#D77757"/>
+  <!-- y=28 feet -->
+  <rect x="16" y="28" width="4" height="7" fill="#D77757"/>
+  <rect x="24" y="28" width="4" height="7" fill="#D77757"/>
+  <rect x="44" y="28" width="4" height="7" fill="#D77757"/>
+  <rect x="52" y="28" width="4" height="7" fill="#D77757"/>
+</svg>

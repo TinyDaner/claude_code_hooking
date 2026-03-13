@@ -1,0 +1,14 @@
+{
+  "name": "claude-hook-monitor",
+  "version": "1.0.0",
+  "description": "Multi-terminal Claude Code monitoring dashboard via HTTP hooks",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "open": "^10.1.0",
+    "ws": "^8.18.0"
+  }
+}
