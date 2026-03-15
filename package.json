@@ -1,6 +1,6 @@
 {
   "name": "claude-hook-monitor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Multi-terminal Claude Code monitoring dashboard via HTTP hooks",
   "main": "server.js",
   "scripts": {
