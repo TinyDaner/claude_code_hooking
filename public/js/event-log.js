@@ -52,7 +52,9 @@ const EventLog = {
 
   _appendEventElement(event) {
     const el = document.createElement('div');
-    el.className = 'event-item' + (event.type === 'PostToolUseFailure' ? ' event-error' : '');
+    const isError = event.type === 'PostToolUseFailure';
+    const isHighlight = event.type === 'TaskCompleted' || event.type === 'InstructionsLoaded';
+    el.className = 'event-item' + (isError ? ' event-error' : '') + (isHighlight ? ' event-highlight' : '');
     const time = new Date(event.timestamp).toLocaleTimeString();
     const sessionId = event.sessionId || '';
     const displayName = NameGenerator.getName(sessionId);
@@ -91,7 +93,15 @@ const EventLog = {
       Notification: '<span class="event-type-icon">♪</span>',
       UserPromptSubmit: '<span class="event-type-icon">▷</span>',
       PreCompact: '<span class="event-type-icon">⊘</span>',
+      PostCompact: '<span class="event-type-icon">⊙</span>',
       ConfigChange: '<span class="event-type-icon">⚙\uFE0E</span>',
+      InstructionsLoaded: '<span class="event-type-icon">📋\uFE0E</span>',
+      TaskCompleted: '<span class="event-type-icon">✔</span>',
+      TeammateIdle: '<span class="event-type-icon">◇</span>',
+      WorktreeCreate: '<span class="event-type-icon">🌿\uFE0E</span>',
+      WorktreeRemove: '<span class="event-type-icon">✂\uFE0E</span>',
+      Elicitation: '<span class="event-type-icon icon-pulse">?</span>',
+      ElicitationResult: '<span class="event-type-icon">!</span>',
     };
     return icons[type] || '<span class="event-type-icon">·</span>';
   },

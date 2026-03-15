@@ -32,6 +32,7 @@ const SessionCard = {
       </div>
       <div class="card-body">
         <div class="card-row"><span class="label">目录</span><span class="value" title="${session.cwd || ''}">${cwd}</span></div>
+        ${session.model ? `<div class="card-row"><span class="label">模型</span><span class="value">${session.model}${session.agentType ? ` (${session.agentType})` : ''}</span></div>` : ''}
         <div class="card-row"><span class="label">工具</span><span class="value">${toolContent}</span></div>
         <div class="card-row"><span class="label">时长</span><span class="value">${duration}</span></div>
         <div class="card-row"><span class="label">提示</span><span class="value">${session.stats.prompts || 0} 次</span></div>
@@ -41,7 +42,7 @@ const SessionCard = {
       ${session.status === 'active' ? '<div class="claude-runner-wrap"><div class="claude-runner"></div></div>' : ''}
       <div class="card-footer">
         <div class="subagent-badges">${session.subagents.map((a, i) => `<span class="subagent-badge">&#9670; 子代理 #${i + 1}</span>`).join('')}</div>
-        <span>${session.stats.toolCalls} 次工具 &middot; ${session.stats.permissions} 次授权${session.stats.errors ? ` &middot; <span style="color:#FF3B30">${session.stats.errors} 错误</span>` : ''}${session.stats.compactions ? ` &middot; <span style="color:#AF52DE">${session.stats.compactions} 压缩</span>` : ''}${((session.stats.inputTokens || 0) + (session.stats.outputTokens || 0) + (session.stats.cacheReadTokens || 0) + (session.stats.cacheCreateTokens || 0)) > 0 ? ` &middot; <span class="token-value">${this._formatTokenCount((session.stats.inputTokens || 0) + (session.stats.outputTokens || 0) + (session.stats.cacheReadTokens || 0) + (session.stats.cacheCreateTokens || 0))}</span> token` : ''}</span>
+        <span>${session.stats.toolCalls} 次工具 &middot; ${session.stats.permissions} 次授权${session.stats.errors ? ` &middot; <span style="color:#FF3B30">${session.stats.errors} 错误</span>` : ''}${session.stats.compactions ? ` &middot; <span style="color:#AF52DE">${session.stats.compactions} 压缩</span>` : ''}${session.stats.tasksCompleted ? ` &middot; <span style="color:#34C759">${session.stats.tasksCompleted} 任务</span>` : ''}${session.stats.worktrees ? ` &middot; <span style="color:#5AC8FA">${session.stats.worktrees} 工作区</span>` : ''}${session.stats.instructionsLoaded ? ` &middot; ${session.stats.instructionsLoaded} 指令` : ''}${((session.stats.inputTokens || 0) + (session.stats.outputTokens || 0) + (session.stats.cacheReadTokens || 0) + (session.stats.cacheCreateTokens || 0)) > 0 ? ` &middot; <span class="token-value">${this._formatTokenCount((session.stats.inputTokens || 0) + (session.stats.outputTokens || 0) + (session.stats.cacheReadTokens || 0) + (session.stats.cacheCreateTokens || 0))}</span> token` : ''}${session.endReason ? ` &middot; <span style="color:var(--text-tertiary)">结束: ${session.endReason}</span>` : ''}</span>
         <div class="card-actions">
           ${session.status !== 'ended' ? `<button class="card-focus-terminal" title="跳转终端" data-focus-terminal="${session.id}">&#9654; 终端</button>` : ''}
           <button class="card-delete" title="移除会话" data-delete="${session.id}">&times;</button>

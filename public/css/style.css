@@ -573,7 +573,18 @@ body {
 .event-type-tag.UserPromptSubmit { background: rgba(0,122,255,0.12); color: #007AFF; }
 .event-type-tag.PreCompact { background: rgba(175,82,222,0.12); color: #AF52DE; }
 .event-type-tag.ConfigChange { background: rgba(255,204,0,0.15); color: #CC8800; }
+.event-type-tag.PostCompact { background: rgba(175,82,222,0.12); color: #AF52DE; }
+.event-type-tag.InstructionsLoaded { background: rgba(90,200,250,0.12); color: #5AC8FA; }
+.event-type-tag.TaskCompleted { background: rgba(52,199,89,0.15); color: #34C759; font-weight: 700; }
+.event-type-tag.TeammateIdle { background: rgba(142,142,147,0.12); color: #8E8E93; }
+.event-type-tag.WorktreeCreate, .event-type-tag.WorktreeRemove {
+  background: rgba(90,200,250,0.12); color: #5AC8FA;
+}
+.event-type-tag.Elicitation, .event-type-tag.ElicitationResult {
+  background: rgba(255,159,10,0.12); color: #FF9F0A;
+}
 .event-item.event-error { background: rgba(255,59,48,0.04); }
+.event-item.event-highlight { background: rgba(52,199,89,0.04); }
 
 .event-detail {
   flex: 1;
