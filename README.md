@@ -27,6 +27,7 @@ A real-time multi-terminal Claude Code monitoring dashboard. Receives events via
 - **Light / Dark Theme** — Follow system preference or toggle manually, auto-saved
 - **Responsive Layout** — Desktop, tablet, mobile (5 breakpoints + touch optimization)
 - **Auto Cleanup** — Ended sessions are automatically removed after 1 hour
+- **Feishu (Lark) Bot** — Push alerts to Feishu group chats / DMs with interactive card buttons
 
 ### Quick Start
 
@@ -155,6 +156,67 @@ Alert banners appear at the top of the page when:
 
 Click a banner to jump to the corresponding session. Banners auto-dismiss after 15 seconds. Browser notifications are triggered when the page is in the background.
 
+### Feishu (Lark) Bot Integration
+
+Push real-time alerts to Feishu when Claude Code needs attention (permission requests, tool failures, timeouts, etc.).
+
+#### 1. Create a Feishu App
+
+1. Go to [Feishu Open Platform](https://open.feishu.cn/app) → **Create Custom App**
+2. Note the **App ID** and **App Secret** from the app credentials page
+
+#### 2. Configure App Permissions
+
+In your Feishu app's **Permissions & Scopes**, add the following:
+
+| Permission | Scope ID | Purpose |
+|------------|----------|---------|
+| Send messages as bot | `im:message:send_as_bot` | Send alert cards to chats |
+| Update messages sent by bot | `im:message:update` | Update card status on button click |
+| Read group chat info | `im:chat:readonly` | Verify chat ID connectivity |
+
+After adding permissions, click **Publish** to apply.
+
+#### 3. Enable the Bot
+
+1. In the app settings, go to **Bot** → Enable the bot capability
+2. Add the bot to the target group chat
+3. Get the group chat's **Chat ID**: right-click the group → **Info** → copy Chat ID (`oc_xxxx`)
+
+#### 4. Configure in Dashboard
+
+1. Click the 🔔 button in the dashboard navbar
+2. Fill in **App ID**, **App Secret**, and **Chat ID**
+3. Check **Enable Feishu Notifications**
+4. Click **Save** → **Send Test** to verify
+
+#### 5. Card Callback (Optional)
+
+To enable interactive buttons (Acknowledge / Mute) on alert cards:
+
+1. In Feishu app settings → **Event Subscriptions** → **Request URL**, enter:
+   ```
+   http://<your-dashboard-host>:3456/feishu/callback
+   ```
+2. The dashboard will respond to Feishu's URL verification challenge automatically
+
+> **Note**: Card callbacks require the dashboard to be accessible from the internet (e.g., via ngrok or a public server).
+
+#### Alert Events
+
+| Event | Default | Priority | Description |
+|-------|---------|----------|-------------|
+| Permission Request | ✅ On | High | Claude Code is waiting for user authorization |
+| Tool Failure | ✅ On | High | A tool execution failed |
+| Needs Attention | ✅ On | Medium | Session flagged as needing attention |
+| Status: Needs Attention | ✅ On | High | Session status changed to needs_attention |
+| Waiting Timeout | ✅ On | Medium | Waiting for input longer than N minutes |
+| Abnormal End | ✅ On | Medium | Session ended abnormally |
+| Session Start | ❌ Off | Info | New session started |
+| Subagent Start | ❌ Off | Info | Subagent spawned |
+
+All events, priorities, dedup windows, mute durations, and escalation timers are configurable in the settings modal.
+
 ### API Endpoints
 
 | Method | Path | Description |
@@ -167,6 +229,11 @@ Click a banner to jump to the corresponding session. Banners auto-dismiss after 
 | GET | `/api/events` | Get global event log |
 | GET | `/api/stats` | Get status statistics |
 | GET | `/api/config` | Get Hook config JSON |
+| GET | `/api/feishu/config` | Get Feishu config (secrets masked) |
+| PUT | `/api/feishu/config` | Save Feishu config |
+| POST | `/api/feishu/test` | Send test card to Feishu |
+| GET | `/api/feishu/status` | Get Feishu connection status |
+| POST | `/feishu/callback` | Feishu card button callback |
 
 ### Project Structure
 
@@ -179,7 +246,13 @@ claude-hook-monitor/
 │   ├── hook-router.js        # Hook request handling & broadcast
 │   ├── event-processor.js    # Event parsing & session state updates
 │   ├── config-generator.js   # Config JSON generation
-│   └── terminal-checker.js   # Terminal window detection & orphan cleanup
+│   ├── terminal-checker.js   # Terminal window detection & orphan cleanup
+│   └── feishu/
+│       ├── client.js         # Feishu API client (native https, zero deps)
+│       ├── notifier.js       # Notification engine (dedup, mute, escalation)
+│       ├── cards.js          # Card template builders
+│       ├── scheduler.js      # Scheduled summary reports
+│       └── config-manager.js # Config persistence (data/feishu-config.json)
 └── public/
     ├── index.html            # Dashboard page
     ├── css/style.css         # Styles (Apple design style)
@@ -190,7 +263,8 @@ claude-hook-monitor/
     │   ├── session-card.js   # Session card component
     │   ├── event-log.js      # Event log panel
     │   ├── alerts.js         # Alert banners + browser notifications
-    │   └── theme.js          # Theme toggle
+    │   ├── theme.js          # Theme toggle
+    │   └── feishu-settings.js # Feishu settings modal
     └── assets/favicon.svg
 ```
 
@@ -225,6 +299,7 @@ claude-hook-monitor/
 - **亮色 / 暗色主题** — 跟随系统或手动切换，偏好自动保存
 - **响应式布局** — 适配桌面、平板、手机（5 个断点 + 触屏优化）
 - **自动清理** — 已结束会话超过 1 小时自动回收
+- **飞书机器人** — 告警推送到飞书群聊/私聊，支持交互卡片按钮（确认/静默）
 
 ### 快速开始
 
@@ -353,6 +428,67 @@ PORT=8080 npm start
 
 点击横幅可跳转到对应会话。横幅会在 15 秒后自动消失。如果页面在后台，还会触发浏览器通知。
 
+### 飞书机器人集成
+
+当 Claude Code 需要关注时（权限请求、工具失败、超时等），实时推送告警卡片到飞书。
+
+#### 1. 创建飞书应用
+
+1. 进入 [飞书开放平台](https://open.feishu.cn/app) → **创建自建应用**
+2. 在应用凭证页面记录 **App ID** 和 **App Secret**
+
+#### 2. 配置应用权限
+
+在飞书应用的 **权限管理** 中，添加以下权限：
+
+| 权限 | 权限标识 | 用途 |
+|------|----------|------|
+| 以应用身份发消息 | `im:message:send_as_bot` | 发送告警卡片 |
+| 更新应用发送的消息 | `im:message:update` | 按钮点击后更新卡片状态 |
+| 获取群组信息 | `im:chat:readonly` | 验证群聊连通性 |
+
+添加后点击 **发布版本** 使权限生效。
+
+#### 3. 启用机器人能力
+
+1. 在应用设置 → **机器人** → 启用机器人能力
+2. 将机器人添加到目标群聊
+3. 获取群聊的 **Chat ID**：右键群聊 → **群信息** → 复制 Chat ID（`oc_xxxx`）
+
+#### 4. 在 Dashboard 中配置
+
+1. 点击仪表盘导航栏的 🔔 按钮
+2. 填写 **App ID**、**App Secret** 和 **Chat ID**
+3. 勾选 **启用飞书通知**
+4. 点击 **保存配置** → **发送测试** 验证
+
+#### 5. 卡片回调（可选）
+
+要启用告警卡片上的交互按钮（确认/静默）：
+
+1. 在飞书应用设置 → **事件订阅** → **请求地址** 中填入：
+   ```
+   http://<你的Dashboard地址>:3456/feishu/callback
+   ```
+2. Dashboard 会自动响应飞书的 URL 验证请求
+
+> **注意**：卡片回调要求 Dashboard 可被公网访问（如通过 ngrok 或部署在公网服务器上）。
+
+#### 告警事件
+
+| 事件 | 默认 | 优先级 | 说明 |
+|------|------|--------|------|
+| 权限请求 | ✅ 开启 | 高 | Claude Code 等待用户授权 |
+| 工具失败 | ✅ 开启 | 高 | 工具执行出错 |
+| 需关注通知 | ✅ 开启 | 中 | 会话标记为需要关注 |
+| 状态变更(需关注) | ✅ 开启 | 高 | 会话状态变为 needs_attention |
+| 等待超时 | ✅ 开启 | 中 | 等待输入超过 N 分钟 |
+| 异常结束 | ✅ 开启 | 中 | 会话异常退出 |
+| 会话启动 | ❌ 关闭 | 信息 | 新会话启动 |
+| 子代理启动 | ❌ 关闭 | 信息 | 子代理创建 |
+
+所有事件开关、优先级、去重窗口、静默时长、升级延迟均可在设置弹窗中配置。
+
 ### 响应式适配
 
 | 宽度 | 设备 | 适配策略 |
@@ -378,6 +514,11 @@ PORT=8080 npm start
 | GET | `/api/events` | 获取全局事件日志 |
 | GET | `/api/stats` | 获取状态统计 |
 | GET | `/api/config` | 获取 Hook 配置 JSON |
+| GET | `/api/feishu/config` | 获取飞书配置（密钥脱敏） |
+| PUT | `/api/feishu/config` | 保存飞书配置 |
+| POST | `/api/feishu/test` | 发送测试卡片到飞书 |
+| GET | `/api/feishu/status` | 获取飞书连接状态 |
+| POST | `/feishu/callback` | 飞书卡片按钮回调 |
 
 ### 项目结构
 
@@ -390,7 +531,13 @@ claude-hook-monitor/
 │   ├── hook-router.js        # Hook 请求处理与广播
 │   ├── event-processor.js    # 事件解析与会话状态更新
 │   ├── config-generator.js   # 配置 JSON 生成
-│   └── terminal-checker.js   # 终端窗口检测与孤儿会话清理
+│   ├── terminal-checker.js   # 终端窗口检测与孤儿会话清理
+│   └── feishu/
+│       ├── client.js         # 飞书 API 客户端（原生 https，零依赖）
+│       ├── notifier.js       # 通知引擎（去重、静默、升级、聚合）
+│       ├── cards.js          # 卡片模板构建器
+│       ├── scheduler.js      # 定时摘要报告调度器
+│       └── config-manager.js # 配置持久化（data/feishu-config.json）
 └── public/
     ├── index.html            # 仪表盘页面
     ├── css/style.css         # 样式（Apple 设计风格）
@@ -401,7 +548,8 @@ claude-hook-monitor/
     │   ├── session-card.js   # 会话卡片组件
     │   ├── event-log.js      # 事件日志面板
     │   ├── alerts.js         # 告警横幅 + 浏览器通知
-    │   └── theme.js          # 主题切换
+    │   ├── theme.js          # 主题切换
+    │   └── feishu-settings.js # 飞书设置弹窗
     └── assets/favicon.svg
 ```
 
