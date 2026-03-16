@@ -23,6 +23,7 @@
     </div>
     <div class="navbar-actions">
       <div class="ws-indicator" id="ws-indicator" title="WebSocket 未连接"></div>
+      <button class="btn-icon" id="btn-feishu" title="飞书通知设置">&#128276;</button>
       <button class="btn-icon" id="btn-config" title="Hook 配置">&#9881;</button>
       <button class="btn-icon" id="btn-theme" title="切换主题">&#9789;</button>
     </div>
@@ -77,6 +78,158 @@
     </div>
   </div>
 
+  <!-- Feishu Settings Modal -->
+  <div class="modal-overlay" id="feishu-modal" style="display:none">
+    <div class="modal feishu-modal-wide">
+      <div class="modal-header">
+        <h2>飞书通知设置</h2>
+        <button class="modal-close" id="feishu-modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- Connection status -->
+        <div class="feishu-conn-row">
+          <span class="feishu-dot disconnected" id="feishu-conn-dot"></span>
+          <span id="feishu-conn-label">未连接</span>
+          <span class="feishu-status" id="feishu-status"></span>
+        </div>
+
+        <!-- Section: Enable -->
+        <div class="feishu-section">
+          <label class="feishu-toggle-label">
+            <input type="checkbox" id="feishu-enabled">
+            <span>启用飞书通知</span>
+          </label>
+        </div>
+
+        <!-- Section: Credentials -->
+        <div class="feishu-section">
+          <h3 class="feishu-section-title">连接设置</h3>
+          <div class="feishu-field">
+            <label for="feishu-app-id">App ID</label>
+            <input type="text" id="feishu-app-id" placeholder="cli_xxxxx">
+          </div>
+          <div class="feishu-field">
+            <label for="feishu-app-secret">App Secret</label>
+            <input type="password" id="feishu-app-secret" placeholder="App Secret">
+          </div>
+          <div class="feishu-field">
+            <label for="feishu-dashboard-url">Dashboard URL</label>
+            <input type="text" id="feishu-dashboard-url" placeholder="http://localhost:3456">
+          </div>
+        </div>
+
+        <!-- Section: Targets -->
+        <div class="feishu-section">
+          <h3 class="feishu-section-title">推送目标</h3>
+          <div class="feishu-field">
+            <label for="feishu-chat-id">群聊 Chat ID</label>
+            <input type="text" id="feishu-chat-id" placeholder="oc_xxxxx">
+          </div>
+          <div class="feishu-field">
+            <label for="feishu-open-ids">私聊 Open ID（每行一个）</label>
+            <textarea id="feishu-open-ids" rows="2" placeholder="ou_xxxxx"></textarea>
+          </div>
+        </div>
+
+        <!-- Section: Alert Rules -->
+        <div class="feishu-section">
+          <h3 class="feishu-section-title">告警规则</h3>
+          <div class="feishu-rules-grid">
+            <div class="feishu-rule-row">
+              <label><input type="checkbox" id="feishu-rule-PermissionRequest" checked> 权限请求</label>
+              <select id="feishu-priority-PermissionRequest"><option value="high">高</option><option value="medium">中</option><option value="info">信息</option></select>
+            </div>
+            <div class="feishu-rule-row">
+              <label><input type="checkbox" id="feishu-rule-PostToolUseFailure" checked> 工具失败</label>
+              <select id="feishu-priority-PostToolUseFailure"><option value="high">高</option><option value="medium">中</option><option value="info">信息</option></select>
+            </div>
+            <div class="feishu-rule-row">
+              <label><input type="checkbox" id="feishu-rule-Notification_attention" checked> 需关注通知</label>
+              <select id="feishu-priority-Notification_attention"><option value="medium" selected>中</option><option value="high">高</option><option value="info">信息</option></select>
+            </div>
+            <div class="feishu-rule-row">
+              <label><input type="checkbox" id="feishu-rule-StatusChange_NEEDS_ATTENTION" checked> 状态变更(需关注)</label>
+              <select id="feishu-priority-StatusChange_NEEDS_ATTENTION"><option value="high">高</option><option value="medium">中</option><option value="info">信息</option></select>
+            </div>
+            <div class="feishu-rule-row">
+              <label><input type="checkbox" id="feishu-rule-WAITING_FOR_INPUT_timeout" checked> 等待超时</label>
+              <select id="feishu-priority-WAITING_FOR_INPUT_timeout"><option value="medium" selected>中</option><option value="high">高</option><option value="info">信息</option></select>
+            </div>
+            <div class="feishu-rule-row">
+              <label><input type="checkbox" id="feishu-rule-SessionEnd_abnormal" checked> 异常结束</label>
+              <select id="feishu-priority-SessionEnd_abnormal"><option value="medium" selected>中</option><option value="high">高</option><option value="info">信息</option></select>
+            </div>
+            <div class="feishu-rule-row">
+              <label><input type="checkbox" id="feishu-rule-SessionStart"> 会话启动</label>
+              <select id="feishu-priority-SessionStart"><option value="info" selected>信息</option><option value="medium">中</option><option value="high">高</option></select>
+            </div>
+            <div class="feishu-rule-row">
+              <label><input type="checkbox" id="feishu-rule-SubagentStart"> 子代理启动</label>
+              <select id="feishu-priority-SubagentStart"><option value="info" selected>信息</option><option value="medium">中</option><option value="high">高</option></select>
+            </div>
+          </div>
+
+          <div class="feishu-params">
+            <div class="feishu-field-inline">
+              <label>去重窗口(秒)</label>
+              <input type="number" id="feishu-dedup" value="60" min="0" max="600">
+            </div>
+            <div class="feishu-field-inline">
+              <label>等待超时(分)</label>
+              <input type="number" id="feishu-timeout" value="5" min="1" max="60">
+            </div>
+            <div class="feishu-field-inline">
+              <label>升级延迟(分)</label>
+              <input type="number" id="feishu-escalation" value="10" min="1" max="60">
+            </div>
+            <div class="feishu-field-inline">
+              <label>静默时长(分)</label>
+              <input type="number" id="feishu-mute-duration" value="30" min="1" max="1440">
+            </div>
+            <div class="feishu-field-inline">
+              <label>聚合窗口(秒)</label>
+              <input type="number" id="feishu-aggregation" value="10" min="0" max="120">
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: Summary -->
+        <div class="feishu-section">
+          <h3 class="feishu-section-title">定时报告</h3>
+          <label class="feishu-toggle-label">
+            <input type="checkbox" id="feishu-summary-enabled">
+            <span>启用定时摘要</span>
+          </label>
+          <div class="feishu-field">
+            <label for="feishu-summary-interval">发送频率</label>
+            <select id="feishu-summary-interval">
+              <option value="30m">每 30 分钟</option>
+              <option value="1h" selected>每 1 小时</option>
+              <option value="2h">每 2 小时</option>
+              <option value="4h">每 4 小时</option>
+              <option value="1d">每天</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Section: Callback URL -->
+        <div class="feishu-section">
+          <h3 class="feishu-section-title">卡片回调地址</h3>
+          <p class="feishu-hint">在飞书开放平台「事件订阅」中填入此地址以启用按钮交互：</p>
+          <div class="feishu-callback-row">
+            <code id="feishu-callback-url">-</code>
+            <button class="btn btn-secondary btn-sm" id="feishu-btn-copy-callback">复制</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="feishu-btn-test">发送测试</button>
+        <button class="btn btn-primary" id="feishu-btn-save">保存配置</button>
+      </div>
+    </div>
+  </div>
+
   <script src="/js/theme.js"></script>
   <script src="/js/ws.js"></script>
   <script src="/js/name-generator.js"></script>
@@ -84,6 +237,7 @@
   <script src="/js/event-log.js"></script>
   <script src="/js/alerts.js"></script>
   <script src="/js/dashboard.js"></script>
+  <script src="/js/feishu-settings.js"></script>
   <script src="/js/app.js"></script>
 </body>
 </html>

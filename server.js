@@ -6,11 +6,23 @@ const { SessionStore } = require('./lib/session-store');
 const { createHookRouter } = require('./lib/hook-router');
 const { generateFullSettings } = require('./lib/config-generator');
 const terminalChecker = require('./lib/terminal-checker');
+const { FeishuConfigManager } = require('./lib/feishu/config-manager');
+const { FeishuClient } = require('./lib/feishu/client');
+const { FeishuNotifier } = require('./lib/feishu/notifier');
+const { SummaryScheduler } = require('./lib/feishu/scheduler');
 
 const PORT = process.env.PORT || 3456;
 const app = express();
 const server = http.createServer(app);
 const store = new SessionStore();
+
+// Feishu integration
+const feishuConfig = new FeishuConfigManager();
+const cfg = feishuConfig.load();
+const feishuClient = new FeishuClient(cfg.app_id, cfg.app_secret);
+const feishuNotifier = new FeishuNotifier(feishuClient, feishuConfig, store);
+const summaryScheduler = new SummaryScheduler(feishuNotifier, feishuConfig, store);
+summaryScheduler.start();
 
 // WebSocket
 const wss = new WebSocketServer({ server, path: '/ws' });
@@ -73,7 +85,7 @@ app.post('/hooks/event', (req, res, next) => {
     console.log('[DEBUG] UserPromptSubmit received:', JSON.stringify(req.body, null, 2));
   }
   next();
-}, createHookRouter(store, broadcast, cancelRemoval));
+}, createHookRouter(store, broadcast, cancelRemoval, feishuNotifier));
 
 // REST API
 app.get('/api/sessions', (req, res) => {
@@ -184,6 +196,89 @@ if ($target) {
   }
 });
 
+// --- Feishu API routes ---
+app.get('/api/feishu/config', (req, res) => {
+  res.json(feishuConfig.getSanitized());
+});
+
+app.put('/api/feishu/config', (req, res) => {
+  try {
+    const newCfg = feishuConfig.save(req.body);
+    feishuClient.updateCredentials(newCfg.app_id, newCfg.app_secret);
+    summaryScheduler.reconfigure();
+    res.json({ ok: true });
+  } catch (err) {
+    res.json({ ok: false, error: err.message });
+  }
+});
+
+app.post('/api/feishu/test', async (req, res) => {
+  try {
+    const testCfg = feishuConfig.load();
+    if (!testCfg.app_id || !testCfg.app_secret) {
+      return res.json({ ok: false, error: '请先配置 App ID 和 App Secret' });
+    }
+    if (!testCfg.targets?.default_chat_id) {
+      return res.json({ ok: false, error: '请先配置群聊 chat_id' });
+    }
+    await feishuClient.testConnection(testCfg.targets.default_chat_id);
+    res.json({ ok: true });
+  } catch (err) {
+    res.json({ ok: false, error: err.message });
+  }
+});
+
+app.get('/api/feishu/status', (req, res) => {
+  const testCfg = feishuConfig.load();
+  const hasCredentials = !!(testCfg.app_id && testCfg.app_secret);
+  const hasChatId = !!testCfg.targets?.default_chat_id;
+  res.json({
+    enabled: testCfg.enabled,
+    connected: hasCredentials && hasChatId,
+    hasCredentials,
+    hasChatId,
+    mutedSessions: feishuNotifier.getMutedSessions(),
+  });
+});
+
+app.post('/feishu/callback', async (req, res) => {
+  try {
+    const body = req.body;
+    // Feishu URL verification challenge
+    if (body.challenge) {
+      return res.json({ challenge: body.challenge });
+    }
+    // Card action callback
+    const action = body.action;
+    if (action && action.value) {
+      let val;
+      try { val = JSON.parse(action.value); } catch (_) { val = action.value; }
+      const sessionId = val.session_id;
+      const messageId = body.open_message_id;
+      const cards = require('./lib/feishu/cards');
+
+      if (val.action === 'mute' && sessionId) {
+        const duration = val.duration || 30;
+        feishuNotifier.muteSession(sessionId, duration);
+        if (messageId) {
+          const card = cards.buildMutedCard('告警', duration);
+          feishuClient.updateCard(messageId, card).catch(() => {});
+        }
+      } else if (val.action === 'acknowledge' && sessionId) {
+        feishuNotifier.acknowledgeAlert(sessionId);
+        if (messageId) {
+          const card = cards.buildAcknowledgedCard('告警');
+          feishuClient.updateCard(messageId, card).catch(() => {});
+        }
+      }
+    }
+    res.json({});
+  } catch (err) {
+    console.error('[feishu-callback] Error:', err.message);
+    res.json({});
+  }
+});
+
 // Every 30s, mark sessions with no events for 2 minutes as idle
 setInterval(() => {
   const stale = store.markStale(2 * 60 * 1000);
@@ -198,6 +293,8 @@ setInterval(() => {
       });
     }
   }
+  // Check feishu escalations
+  feishuNotifier.checkEscalations();
 }, 30 * 1000);
 
 // Prune ended sessions older than 1 minute every 30s
