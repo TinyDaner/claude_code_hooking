@@ -190,18 +190,6 @@ After adding permissions, click **Publish** to apply.
 3. Check **Enable Feishu Notifications**
 4. Click **Save** → **Send Test** to verify
 
-#### 5. Card Callback (Optional)
-
-To enable interactive buttons (Acknowledge / Mute) on alert cards:
-
-1. In Feishu app settings → **Event Subscriptions** → **Request URL**, enter:
-   ```
-   http://<your-dashboard-host>:3456/feishu/callback
-   ```
-2. The dashboard will respond to Feishu's URL verification challenge automatically
-
-> **Note**: Card callbacks require the dashboard to be accessible from the internet (e.g., via ngrok or a public server).
-
 #### Alert Events
 
 | Event | Default | Priority | Description |
@@ -461,18 +449,6 @@ PORT=8080 npm start
 2. 填写 **App ID**、**App Secret** 和 **Chat ID**
 3. 勾选 **启用飞书通知**
 4. 点击 **保存配置** → **发送测试** 验证
-
-#### 5. 卡片回调（可选）
-
-要启用告警卡片上的交互按钮（确认/静默）：
-
-1. 在飞书应用设置 → **事件订阅** → **请求地址** 中填入：
-   ```
-   http://<你的Dashboard地址>:3456/feishu/callback
-   ```
-2. Dashboard 会自动响应飞书的 URL 验证请求
-
-> **注意**：卡片回调要求 Dashboard 可被公网访问（如通过 ngrok 或部署在公网服务器上）。
 
 #### 告警事件
 
